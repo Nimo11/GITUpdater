@@ -23,9 +23,12 @@ GITUpdater is a 8266 library to add automatic updater to your project. GITUpdate
 2. Add reference
    
     **#include "Updater.h"**
+
+    **#include "version.h"**
+
     **GITUpdater _updater;**
 
-3. Add this line in your setup code 
+4. Add this line in your setup code 
       
     **_updater.SetCurrentVersion(BUILD_NUMBER);**
 

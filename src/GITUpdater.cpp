@@ -58,13 +58,13 @@ void GITUpdater::SetGITProjectURL(const char *url)
         */
 void GITUpdater::CheckUpdate()
 {
-    if ((_gitUrl == NULL) || (_gitUrl[0] != '\0'))
+    if ((_gitUrl == NULL) || (_gitUrl[0] == '\0'))
     {
         Serial.println(F("Project URL not set"));
         return;
     }
 
-    if ((_gitUrl == NULL) || (_gitUrl[0] != '\0'))
+    if ((_gitUrl == NULL) || (_gitUrl[0] == '\0'))
     {
         Serial.println(F("Project URL not set"));
         return;
