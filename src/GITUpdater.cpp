@@ -94,7 +94,7 @@ void GITUpdater::CheckUpdate()
                             BR_TLS_RSA_WITH_AES_128_CBC_SHA});
     httpsClient.setInsecure();
 
-    http.begin(URL);
+    http.begin(httpsClient,URL);
 
     int httpCode = http.GET();
     if (httpCode == 200)
