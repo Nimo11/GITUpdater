@@ -47,7 +47,7 @@ public:
     const int   GetGITProjectURL();
 
     /*
-            Return GITHUB project URL
+            Set GITHUB project URL
         */
     void SetGITProjectURL(const char* url);
 
