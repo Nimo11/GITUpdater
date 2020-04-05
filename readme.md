@@ -14,7 +14,7 @@ GITUpdater is a library
 1. Add library : 
 
    add this line to your platformio.ini file 
-      **https://github.com/Nimo11/GITUpdater.git#master**
+      **lib_deps = https://github.com/Nimo11/GITUpdater.git#master**
    or copy src folder content to your project folder
 
 2. Add reference
@@ -25,37 +25,38 @@ GITUpdater is a library
 3. Add this line in your setup code 
       
     **_updater.SetCurrentVersion(BUILD_NUMBER);**
+
     **_updater.SetGITProjectURL("your project url");**
 
 Now you can use :
 
-##### CheckUpdate
+##### void CheckUpdate()
 
             Check on line version and compare to current
             Return true if on line is newer
 
-##### Updates
+##### bool Updates()
 
             Check on line version and compare to current
             Return true if on line is newer
 
-##### GetOnLineVersion
+##### GetOnLineVersion()
 
             Return last on line version readed
 
-##### SetCurrentVersion
+##### SetCurrentVersion()
 
             set current build project version value
 
-##### GetCurrentVersion
+##### GetCurrentVersion()
 
             Return current project value
 
-##### SetGITProjectURL
+##### SetGITProjectURL()
 
             Set GITHUB project URL. For example https://github.com/Nimo11/GITUpdater
 
-##### GetGITProjectURL
+##### GetGITProjectURL()
 
             Return GITHUB project URL
 

@@ -29,6 +29,14 @@ const int GITUpdater::GetCurrentVersion()
 }
 
 /*
+            Return current project value
+        */
+const char*   GITUpdater::GetGITProjectURL()
+{
+    return _gitUrl;
+}
+
+/*
             set current build project value
         */
 void  GITUpdater::SetCurrentVersion(int v)
