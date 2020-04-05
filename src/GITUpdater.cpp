@@ -126,7 +126,7 @@ bool GITUpdater::Updates()
 
         String URL = String(_gitUrl);
 
-        URL.concat("/.pio/build/esp12e/firmware.bin");
+        URL.concat("/bin/firmware.bin");
 
         t_httpUpdate_return ret = ESPhttpUpdate.update(URL);
 
