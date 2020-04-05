@@ -1,5 +1,8 @@
 # GITUpdater
-GITUpdater is a library
+
+GITUpdater is a 8266 library to add automatic updater to your project. GITUpdater allows you to check the version of your project available on GITHub and to carry out the update if you wish. 
+
+
 ## Installing GIT-Update
 
 1. Add automatic version file builder to your project
@@ -28,7 +31,7 @@ GITUpdater is a library
 
     **_updater.SetGITProjectURL("your project url");**
 
-Now you can use :
+## Now you can use :
 
 ##### void CheckUpdate()
 
