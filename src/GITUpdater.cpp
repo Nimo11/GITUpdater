@@ -77,7 +77,7 @@ void GITUpdater::CheckUpdate()
     }
 
     String URL = String(_gitUrl);
-
+//https://raw.githubusercontent.com/Nimo11/RFIDReader/master/include/version.h
     URL.concat(F("/include/version.h"));
 
     Serial.println(F("Checking for firmware updates."));
