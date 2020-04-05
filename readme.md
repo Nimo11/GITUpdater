@@ -9,7 +9,7 @@ GITUpdater is a 8266 library to add automatic updater to your project. GITUpdate
    - Copy library 'script' folder in your root platform.io project folder
    - add folowing line to your platformio.ini file :   
        **extra_scripts = pre:script\buildscript_versioning.py**
-
+                       **post:script\copy_bin.py**
 2. Add library to your project
 
 ## Using GIT-Update
