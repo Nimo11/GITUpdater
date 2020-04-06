@@ -50,7 +50,7 @@ void GITUpdater::SetCurrentVersion(int v)
 void GITUpdater::SetGITProjectURL(const char *url)
 {
     _gitUrl = url;
-    _rawGitURL = ReplaceAll(url, "github.com", "raw.githubusercontent.com").c_str();
+    ReplaceAll(url, _rawGitURL, "github.com", "raw.githubusercontent.com");
 }
 
 /*
@@ -78,7 +78,7 @@ bool GITUpdater::CheckUpdate()
     }
 
     String URL = String(_rawGitURL);
-    
+
     URL.concat(F("/versioning"));
 
     Serial.println(F("Checking for firmware updates."));
@@ -107,7 +107,7 @@ bool GITUpdater::CheckUpdate()
         Serial.print(F("Available firmware version: "));
         Serial.println(_onLineVersion);
         http.end();
-        return _currentBuild<_onLineVersion;
+        return _currentBuild < _onLineVersion;
     }
     else
     {
@@ -124,7 +124,7 @@ bool GITUpdater::CheckUpdate()
         */
 bool GITUpdater::Updates()
 {
-    if (false)
+    if (true)
     {
         Serial.println("Preparing to update");
 
@@ -140,44 +140,52 @@ bool GITUpdater::Updates()
 
         URL.concat("/bin/firmware.bin");
 
-        t_httpUpdate_return ret = ESPhttpUpdate.update(httpsClient,URL);
+        t_httpUpdate_return ret = ESPhttpUpdate.update(httpsClient, URL);
 
         switch (ret)
         {
         case HTTP_UPDATE_FAILED:
             Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-            return true;
+            return false;
             break;
 
         case HTTP_UPDATE_NO_UPDATES:
-            Serial.println("HTTP_UPDATE_NO_UPDATES");
+            Serial.println(F("HTTP_UPDATE_NO_UPDATES"));
             return false;
+            break;
+        case HTTP_UPDATE_OK:
+            return true;
             break;
         }
     }
     else
     {
-        Serial.println("Already on latest version");
+        Serial.println(F("Already on latest version"));
         return false;
     }
 
     return false;
 }
 
-std::string GITUpdater::ReplaceAll(std::string str, const std::string &from, const std::string &to)
+void GITUpdater::ReplaceAll(std::string source, char *dest, const std::string &from, const std::string &to)
 {
-    size_t start_pos = 0;
-    size_t find_pos = 0;
-    std::string result="";
-    while ((find_pos = str.find(from, start_pos)) != std::string::npos)
+    std::string newString;
+    //newString.reserve(source.length());  // avoids a few memory allocations
+
+    std::string::size_type lastPos = 0;
+    std::string::size_type findPos;
+
+    while (std::string::npos != (findPos = source.find(from, lastPos)))
     {
-        result+=str.substr(start_pos,find_pos-start_pos);
-        start_pos = find_pos+from.length(); // Handles case where 'to' is a substring of 'from'
+        newString.append(source, lastPos, findPos - lastPos);
+        newString += to;
+        lastPos = findPos + from.length();
     }
 
-    result+=str.substr(start_pos,str.length-start_pos);
+    // Care for the rest after last occurrence
+    newString += source.substr(lastPos);
 
-    return result;
+    strcpy(dest, newString.c_str());
 }
 
 #endif

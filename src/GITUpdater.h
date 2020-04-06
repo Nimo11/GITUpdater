@@ -74,9 +74,9 @@ private:
     const char *_gitUrl;
 
     // raw project URL
-    const char *_rawGitURL;
+    char _rawGitURL[250];
 
-    std::string ReplaceAll(std::string str, const std::string& from, const std::string& to);
+    void ReplaceAll(std::string str,char* dest, const std::string& from, const std::string& to);
 };
 
 #endif
