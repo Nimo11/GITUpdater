@@ -168,7 +168,7 @@ std::string GITUpdater::ReplaceAll(std::string str, const std::string &from, con
 {
     size_t start_pos = 0;
     size_t find_pos = 0;
-    std::string result;
+    std::string result="";
     while ((find_pos = str.find(from, start_pos)) != std::string::npos)
     {
         result+=str.substr(start_pos,find_pos-start_pos);
