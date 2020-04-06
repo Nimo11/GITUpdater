@@ -174,6 +174,9 @@ std::string GITUpdater::ReplaceAll(std::string str, const std::string &from, con
         result+=str.substr(start_pos,find_pos-start_pos);
         start_pos = find_pos+from.length(); // Handles case where 'to' is a substring of 'from'
     }
+
+    result+=str.substr(start_pos,str.length-start_pos);
+
     return result;
 }
 
