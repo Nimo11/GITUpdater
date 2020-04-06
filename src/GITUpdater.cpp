@@ -50,7 +50,7 @@ void GITUpdater::SetCurrentVersion(int v)
 void GITUpdater::SetGITProjectURL(const char *url)
 {
     _gitUrl = url;
-    //_rawGitURL = ReplaceAll(url, "github.com", "raw.githubusercontent.com").c_str();
+    _rawGitURL = ReplaceAll(url, "github.com", "raw.githubusercontent.com").c_str();
 }
 
 /*
@@ -164,7 +164,7 @@ bool GITUpdater::Updates()
     return false;
 }
 
-std::string GITUpdater::ReplaceAll(std::string &str, const std::string &from, const std::string &to)
+std::string GITUpdater::ReplaceAll(std::string str, const std::string &from, const std::string &to)
 {
     size_t start_pos = 0;
     while ((start_pos = str.find(from, start_pos)) != std::string::npos)
