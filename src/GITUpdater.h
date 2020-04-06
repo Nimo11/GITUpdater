@@ -55,7 +55,7 @@ public:
             Check on line version and compare to current
             Return true if on line is newer
         */
-    void CheckUpdate();
+    bool CheckUpdate();
 
     /*
             Check on line version and compare to current
@@ -68,12 +68,15 @@ private:
     int _onLineVersion;
 
     //current build
-    int _currentBuild;
+    int _currentBuild=-1;
 
-    // on line version URL
+    // project URL
     const char *_gitUrl;
 
-    String getMAC();
+    // raw project URL
+    const char *_rawGitURL;
+
+    std::string ReplaceAll(std::string &str, const std::string& from, const std::string& to);
 };
 
 #endif

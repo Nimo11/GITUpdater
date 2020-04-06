@@ -31,7 +31,7 @@ const int GITUpdater::GetCurrentVersion()
 /*
             Return current project value
         */
-const char*   GITUpdater::GetGITProjectURL()
+const char *GITUpdater::GetGITProjectURL()
 {
     return _gitUrl;
 }
@@ -39,9 +39,9 @@ const char*   GITUpdater::GetGITProjectURL()
 /*
             set current build project value
         */
-void  GITUpdater::SetCurrentVersion(int v)
+void GITUpdater::SetCurrentVersion(int v)
 {
-    _currentBuild=v;
+    _currentBuild = v;
 }
 
 /*
@@ -50,34 +50,35 @@ void  GITUpdater::SetCurrentVersion(int v)
 void GITUpdater::SetGITProjectURL(const char *url)
 {
     _gitUrl = url;
+    //_rawGitURL = ReplaceAll(url, "github.com", "raw.githubusercontent.com").c_str();
 }
 
 /*
     Check on line version and compare to current
     Return true if on line is newer
         */
-void GITUpdater::CheckUpdate()
+bool GITUpdater::CheckUpdate()
 {
-    if ((_gitUrl == NULL) || (_gitUrl[0] == '\0'))
+    if ((_rawGitURL == NULL) || (_rawGitURL[0] == '\0'))
     {
         Serial.println(F("Project URL not set"));
-        return;
+        return false;
     }
 
-    if ((_gitUrl == NULL) || (_gitUrl[0] == '\0'))
+    if ((_currentBuild == -1))
     {
-        Serial.println(F("Project URL not set"));
-        return;
+        Serial.println(F("Current project not set"));
+        return false;
     }
 
     if (WiFi.status() != WL_CONNECTED)
     {
         Serial.println(F("Wifi not connected"));
-        return;
+        return false;
     }
 
-    String URL = String(_gitUrl);
-//https://raw.githubusercontent.com/Nimo11/RFIDReader/master/versioning
+    String URL = String(_rawGitURL);
+    
     URL.concat(F("/versioning"));
 
     Serial.println(F("Checking for firmware updates."));
@@ -94,7 +95,7 @@ void GITUpdater::CheckUpdate()
                             BR_TLS_RSA_WITH_AES_128_CBC_SHA});
     httpsClient.setInsecure();
 
-    http.begin(httpsClient,URL);
+    http.begin(httpsClient, URL);
 
     int httpCode = http.GET();
     if (httpCode == 200)
@@ -105,6 +106,8 @@ void GITUpdater::CheckUpdate()
         Serial.println(_currentBuild);
         Serial.print(F("Available firmware version: "));
         Serial.println(_onLineVersion);
+        http.end();
+        return _currentBuild<_onLineVersion;
     }
     else
     {
@@ -112,6 +115,7 @@ void GITUpdater::CheckUpdate()
         Serial.println(httpCode);
     }
     http.end();
+    return false;
 }
 
 /*
@@ -124,11 +128,19 @@ bool GITUpdater::Updates()
     {
         Serial.println("Preparing to update");
 
-        String URL = String(_gitUrl);
+        BearSSL::WiFiClientSecure httpsClient;
+
+        httpsClient.setCiphers({BR_TLS_RSA_WITH_AES_256_CBC_SHA256,
+                                BR_TLS_RSA_WITH_AES_128_CBC_SHA256,
+                                BR_TLS_RSA_WITH_AES_256_CBC_SHA,
+                                BR_TLS_RSA_WITH_AES_128_CBC_SHA});
+        httpsClient.setInsecure();
+
+        String URL = String(_rawGitURL);
 
         URL.concat("/bin/firmware.bin");
 
-        t_httpUpdate_return ret = ESPhttpUpdate.update(URL);
+        t_httpUpdate_return ret = ESPhttpUpdate.update(httpsClient,URL);
 
         switch (ret)
         {
@@ -152,14 +164,15 @@ bool GITUpdater::Updates()
     return false;
 }
 
-String GITUpdater::getMAC()
+std::string GITUpdater::ReplaceAll(std::string &str, const std::string &from, const std::string &to)
 {
-    uint8_t mac[6];
-    char result[14];
-
-    snprintf(result, sizeof(result), "%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-
-    return String(result);
+    size_t start_pos = 0;
+    while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+    {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+    return str;
 }
 
 #endif

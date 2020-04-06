@@ -32,11 +32,11 @@ GITUpdater is a 8266 library to add automatic updater to your project. GITUpdate
       
     **_updater.SetCurrentVersion(BUILD_NUMBER);**
 
-    **_updater.SetGITProjectURL("your project url");**
+    **_updater.SetGITProjectURL("your project url");** for example your project url could be https://github.com/Nimo11/RFIDReader/master
 
 ## Now you can use :
 
-##### void CheckUpdate()
+##### bool CheckUpdate()
 
             Check on line version and compare to current
             Return true if on line is newer
