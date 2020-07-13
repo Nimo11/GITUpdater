@@ -12,6 +12,12 @@
 
 #if defined(ESP8266) || defined(ESP32)
 
+GITUpdater::GITUpdater(Languages lng)
+{
+    _LM.CurrentLanguage=(int)lng;
+    _LM.Dictionary = &dict;
+}
+
 /*
             Return last on line version readed
         */
@@ -61,19 +67,19 @@ bool GITUpdater::CheckUpdate()
 {
     if ((_rawGitURL == NULL) || (_rawGitURL[0] == '\0'))
     {
-        Serial.println(F("Project URL not set"));
+        Logln(_LM.Get((int)Msg::ERR_PRJ_URL));
         return false;
     }
 
     if ((_currentBuild == -1))
     {
-        Serial.println(F("Current project not set"));
+        Logln(_LM.Get((int)Msg::ERR_PRJ_NOT_SET));
         return false;
     }
 
     if (WiFi.status() != WL_CONNECTED)
     {
-        Serial.println(F("Wifi not connected"));
+        Logln(_LM.Get((int)Msg::ERR_WIFI));
         return false;
     }
 
@@ -81,10 +87,10 @@ bool GITUpdater::CheckUpdate()
 
     URL.concat(F("/versioning"));
 
-    Serial.println(F("Checking for firmware updates."));
+    Logln(_LM.Get((int)Msg::MSG_CHK));
 
-    Serial.print(F("Firmware version URL: "));
-    Serial.println(URL);
+    Log(_LM.Get((int)Msg::MSG_URL));
+    Logln(URL.c_str());
 
     BearSSL::WiFiClientSecure httpsClient;
     HTTPClient http;
@@ -102,17 +108,17 @@ bool GITUpdater::CheckUpdate()
     {
         _onLineVersion = httpsClient.readString().toInt();
 
-        Serial.print(F("Current firmware version: "));
-        Serial.println(_currentBuild);
-        Serial.print(F("Available firmware version: "));
-        Serial.println(_onLineVersion);
+        Log(_LM.Get((int)Msg::MSG_CUR_VER));
+        Logln(_currentBuild);
+        Log(_LM.Get((int)Msg::MSG_AVI_VER));
+        Logln(_onLineVersion);
         http.end();
         return _currentBuild < _onLineVersion;
     }
     else
     {
-        Serial.print("Firmware version check failed, got HTTP response code ");
-        Serial.println(httpCode);
+        Log(_LM.Get((int)Msg::ERR_CHK_KO));
+        Logln(httpCode);
     }
     http.end();
     return false;
@@ -124,9 +130,11 @@ bool GITUpdater::CheckUpdate()
         */
 bool GITUpdater::Updates()
 {
-    if (true)
+    State = "";
+
+    if (CheckUpdate())
     {
-        Serial.println("Preparing to update");
+        Logln(_LM.Get((int)Msg::MSG_PREP));
 
         BearSSL::WiFiClientSecure httpsClient;
 
@@ -138,19 +146,21 @@ bool GITUpdater::Updates()
 
         String URL = String(_rawGitURL);
 
-        URL.concat("/bin/firmware.bin");
+        URL.concat(F("/bin/firmware.bin"));
 
         t_httpUpdate_return ret = ESPhttpUpdate.update(httpsClient, URL);
 
         switch (ret)
         {
         case HTTP_UPDATE_FAILED:
-            Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+            char buffer[50];
+            sprintf(buffer, _LM.Get((int)Msg::ERR_UDP_FAILED), ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+            Logln(buffer);
             return false;
             break;
 
         case HTTP_UPDATE_NO_UPDATES:
-            Serial.println(F("HTTP_UPDATE_NO_UPDATES"));
+            Logln(_LM.Get((int)Msg::ERR_UDP_NO_UPD));
             return false;
             break;
         case HTTP_UPDATE_OK:
@@ -160,17 +170,35 @@ bool GITUpdater::Updates()
     }
     else
     {
-        Serial.println(F("Already on latest version"));
+        Logln(_LM.Get((int)Msg::MSG_NO_UPD));
         return false;
     }
 
     return false;
 }
 
+void GITUpdater::Log(const char *msg)
+{
+    Serial.print(msg);
+    State.concat(msg);
+}
+
+void GITUpdater::Logln(const char *msg)
+{
+    Serial.println(msg);
+    State.concat(msg);
+    State.concat("<br>");
+}
+
+void GITUpdater::Logln(int i)
+{
+    char buffer [33];
+    Logln(itoa (i,buffer,10));
+}
+
 void GITUpdater::ReplaceAll(std::string source, char *dest, const std::string &from, const std::string &to)
 {
     std::string newString;
-    //newString.reserve(source.length());  // avoids a few memory allocations
 
     std::string::size_type lastPos = 0;
     std::string::size_type findPos;
@@ -187,5 +215,24 @@ void GITUpdater::ReplaceAll(std::string source, char *dest, const std::string &f
 
     strcpy(dest, newString.c_str());
 }
+
+std::map<int, std::map<int, const char *>> dict PROGMEM = {
+    {(int)GITUpdater::Languages::LANG_EN, {{(int)GITUpdater::Msg::ERR_PRJ_URL, "Project URL not set."}, {(int)GITUpdater::Msg::ERR_PRJ_NOT_SET, "Current project version not set"}, {(int)GITUpdater::Msg::ERR_WIFI, "Wifi not connected"}, {(int)GITUpdater::Msg::ERR_CHK_KO, "Firmware version check failed, got HTTP response code "}, {(int)GITUpdater::Msg::ERR_UDP_FAILED, "HTTP utpdate failed. Error (%d): %s"}, {(int)GITUpdater::Msg::ERR_UDP_NO_UPD, "No update aviable"},
+
+                               {(int)GITUpdater::Msg::MSG_CHK, "Checking for firmware updates."},
+                               {(int)GITUpdater::Msg::MSG_URL, "Firmware version URL: "},
+                               {(int)GITUpdater::Msg::MSG_CUR_VER, "Current firmware version: "},
+                               {(int)GITUpdater::Msg::MSG_AVI_VER, "Available firmware version: "},
+                               {(int)GITUpdater::Msg::MSG_PREP, "Preparing to update"},
+                               {(int)GITUpdater::Msg::MSG_NO_UPD, "Already on latest version"}}},
+
+    {(int)GITUpdater::Languages::LANG_FR, {{(int)GITUpdater::Msg::ERR_PRJ_URL, "L'URL du projet n'est pas définie"}, {(int)GITUpdater::Msg::ERR_PRJ_NOT_SET, "La version du projet actuel n'est pas définie"}, {(int)GITUpdater::Msg::ERR_WIFI, "Le Wifi n'est pas disponible"}, {(int)GITUpdater::Msg::ERR_CHK_KO, "Impossible de vérifier la version en ligne. Le code erreur était "}, {(int)GITUpdater::Msg::ERR_UDP_FAILED, "Echec de mise à jour . Le code erreur était (%d): %s"}, {(int)GITUpdater::Msg::ERR_UDP_NO_UPD, "Pas de mise à jour disponible"},
+
+                               {(int)GITUpdater::Msg::MSG_CHK, "Vérification en cours."},
+                               {(int)GITUpdater::Msg::MSG_URL, "URL du Firmware : "},
+                               {(int)GITUpdater::Msg::MSG_CUR_VER, "Version actuelle du firmware : "},
+                               {(int)GITUpdater::Msg::MSG_AVI_VER, "Version disponible du firmware : "},
+                               {(int)GITUpdater::Msg::MSG_PREP, "Préparation de la mise à jour"},
+                               {(int)GITUpdater::Msg::MSG_NO_UPD, "Aucune nouvelle version n'est disponible"}}}};
 
 #endif
